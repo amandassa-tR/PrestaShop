@@ -1,0 +1,44 @@
+login
+validate that page contains "Dashboard"
+if page doesn't contain "Catalog" above "Orders"
+click "menu" on the left of "PrestaShop logo"
+end
+click "Catalog"
+click "Discounts"
+click "Add new cart rule"
+generate unique name, then enter into "Name" and save as "ruleName"
+generate unique name, then enter into "Code" and save as "ruleCode"
+fill out the rest of the form "Information"
+scroll down
+click button exactly "Save"
+click "Conditions"
+scroll down
+scroll up by 1/3 of the screen
+enter 2 into "Total available"
+enter ctrl + a
+enter delete
+enter "2"
+scroll down
+click button exactly "Save"
+click "Actions"
+click "Percent"
+enter "50" into "Value"
+scroll down
+click exactly "Save"
+scroll up at the top of the page
+validate that page contains "Successful creation" roughly below "Cart Rules"
+start browser "Customer A" and Switch
+Apply limited promo code to a purchase as a new customer
+Apply limited promo code to a purchase as a new customer
+// Validate that the third use of the coupon fails
+create new customer account
+scroll down on "Popular products"
+click "Sweater"
+click "ADD TO CART"
+click "PROCEED TO CHECKOUT"
+click "Have a promo code?"
+enter saved value "ruleCode" into "Promo code"
+click "Add"
+validate that page contains "This voucher has already been used" below "Promo code"
+switch to browser "default"
+clean-up customers

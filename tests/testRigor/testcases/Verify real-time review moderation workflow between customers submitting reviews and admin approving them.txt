@@ -1,0 +1,67 @@
+login
+click "menu" if button exactly "Modules" is not visible
+click "Modules"
+click "Module Manager"
+Search for "Comments"
+click button exactly "Product Comments"
+// Ensure module is installed and enabled
+validate that page contains "Configure" roughly on the right of "Product Comments"
+// Configure module to require admin approval for reviews
+click button "Configure"
+If "No" below "All reviews must be validated by an employee" is visible
+click "No" below "All reviews must be validated by an employee"
+validate that page contains "Yes" below "All reviews must be validated by an employee"
+end
+click button "Save"
+// Customer writes new review
+start browser "Customer" and switch
+create new customer account
+search for "Hummingbird printed t-shirt"
+click button exactly "Hummingbird printed t-shirt"
+Scroll down
+grab value of "(?<=Comments \()[0-9]+" and save it as "commentCount"
+Click "Write your review" button
+generate unique name , then enter into "Title" and save as "reviewTitle"
+generate unique name , then enter into "Review" and save as "reviewText"
+click 4th "star" roughly on the right of "Quality:"
+Click button "Send"
+Check that page contains "Review sent"
+Check that page contains "Your comment has been submitted and will be available once approved by a moderator."
+click button "OK"
+// validate approval from admin's side
+switch to browser "default"
+reload
+scroll down until "Reviews waiting for approval" is visible
+check that page contains saved value "reviewText" on the left of saved value "name" and on the right of saved value "reviewTitle"
+Check that page contains button "Approve"
+switch to browser "Customer"
+search for "Hummingbird printed t-shirt"
+click button exactly "Hummingbird printed t-shirt"
+scroll down until page contains "Comments"
+check that page doesn't contain saved value "reviewTitle"
+check that page contains string with parameters "Comments (${commentCount})"
+switch to browser "default"
+click "Approve" roughly on the right of saved value "name"
+scroll down at the bottom of the screen
+Check that page contains saved value "reviewTitle" roughly below "Approved Reviews"
+// validate review is visible after approval
+switch to browser "Customer"
+search for "Hummingbird printed t-shirt"
+click button exactly "Hummingbird printed t-shirt"
+scroll down until page contains "Comments"
+validate that page doesn't contain string with parameters "Comments (${commentCount})"
+save expression "${commentCount} + 1" as "newCommentCount"
+validate that page contains string with parameters "Comments (${newCommentCount})"
+scroll down until page contains saved value "reviewTitle"
+Check that page contains saved value "reviewText"
+check that page contains saved value "reviewTitle"
+// validate that guests can read the review
+start browser "Another Customer" and switch
+click "Back to"
+search for "Hummingbird printed t-shirt"
+click button exactly "Hummingbird printed t-shirt"
+Scroll down until page contains saved value "reviewTitle"
+check that page contains saved value "reviewTitle"
+Check that page contains saved value "reviewText"
+switch to browser "default"
+clean-up customers

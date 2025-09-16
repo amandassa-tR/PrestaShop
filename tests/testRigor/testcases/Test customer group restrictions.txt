@@ -1,0 +1,61 @@
+login
+click "menu"
+scroll down on "Welcome back"
+click "Shop Parameters"
+click "Customer Settings"
+click "Groups"
+click "Add new group"
+fill out form "Customer group"
+generate from template "#0", then enter into "Discount" and save it as "discountPercentage"
+enter saved value "discountPercentage" into "Discount"
+generate unique name , then enter into "Name" and save it as "newGroup"
+scroll down
+click "Save"
+check that page contains "Successful creation"
+click exactly "menu"
+click "Customers" below "Catalog"
+click "Customers" above the "Addresses"
+click "Add new customer"
+scroll down
+double click "Select all"
+click saved value "newGroup"
+select saved value "newGroup" from "Default customer group"
+scroll up
+fill out form "Customer"
+grab value from field "Email" and save it as "groupCustomerEmail"
+enter saved value "password" into "Password"
+scroll down
+double click "Select all"
+click saved value "newGroup"
+select saved value "newGroup" from "Default customer group"
+scroll up
+grab value from field "Email" and save it as "groupCustomerEmail"
+grab value from field "Email" and save it as "groupCustomerEmail"
+enter saved value "password" into "Password"
+scroll down
+click "Save"
+click "Add new customer"
+fill out all empty and required fields and skip unrecognized fields
+enter saved value "password" into "Password"
+grab value from field "Email" and save it as "regularCustomerEmail"
+scroll down
+click "Save"
+start browser "Regular customer" and switch
+click "Back to"
+save value "regularCustomerEmail" as "username"
+log in
+save value saved value "regularCustomerEmail" as "username"
+login
+search for "Today is a good day Framed poster"
+click button "Today is a good day Framed poster"
+grab value of "(?<=€)[0-9.]+" and save it as "regularPrice"
+start browser "Special Group Customer" and switch
+click "Back to"
+save value saved value "groupCustomerEmail" as "username"
+login
+scroll down
+click "Today is a good day Framed poster"
+grab value of "(?<=€)[0-9.]+" and save it as "groupPrice"
+check that expression "(((${regularPrice} - ${groupPrice}) / ${regularPrice}) * 100) - ${discountPercentage}" itself is less than as a number to "0.1"
+switch to browser "default"
+clean-up customers

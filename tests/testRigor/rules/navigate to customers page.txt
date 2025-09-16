@@ -1,0 +1,4 @@
+click "PrestaShop logo" if exists
+click "menu"
+click "Customers" below "Catalog"
+click "Customers" above "Addresses"

@@ -1,7 +1,6 @@
 name: API Module tests
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read   #   to clone the repos and get release assets (shivammathur/setup-php)

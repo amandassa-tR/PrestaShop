@@ -1,0 +1,5 @@
+click button exactly "Stocks"
+enter saved value "n" into "Add or subtract items"
+click "Save and publish"
+scroll up at the top of the screen
+validate that page contains "Successful update"

@@ -1,0 +1,10 @@
+navigate to customers page if page doesn't contain button "Add new customers"
+scroll down by 1/2 of the screen
+validate that "Bulk actions" is not clickable
+scroll down by 1/3 of the screen
+click "bulk" on the left of "Search ID"
+validate that "Bulk actions" is clickable
+click "Bulk actions"
+click "Delete selected"
+click "Delete"
+validate that page contains "The selection has been successfully deleted"

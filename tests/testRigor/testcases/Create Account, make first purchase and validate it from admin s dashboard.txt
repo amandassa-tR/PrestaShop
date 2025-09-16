@@ -1,0 +1,30 @@
+create new customer account
+scroll down on "Popular products"
+click "Sweater"
+click "ADD TO CART"
+click "PROCEED TO CHECKOUT"
+click "PROCEED TO CHECKOUT"
+fill out all empty fields
+click "CONTINUE"
+click "Please choose"
+click "Alabama"
+click "CONTINUE"
+accept prompt with value ""
+click "CONTINUE"
+check if "PAYMENT" is visible
+click "Pay by cash on delivery"
+click "I agree"
+click "PLACE ORDER"
+validate that page contains "YOUR ORDER IS CONFIRMED"
+start browser "Admin" and switch
+login
+validate that page contains exactly "menu" at the top left of the screen
+click "Quick Access"
+click "Orders"
+validate that page contains "Awaiting" roughly to the right of saved value "name"
+click "Awaiting" roughly to the right of saved value "name"
+click "Authorized. To be captured by merchant"
+click saved value "name"
+validate that page contains "name" roughly on the right of "Customer"
+validate that page contains saved value "email"
+// delete user account

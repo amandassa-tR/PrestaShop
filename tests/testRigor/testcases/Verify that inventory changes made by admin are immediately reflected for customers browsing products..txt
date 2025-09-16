@@ -1,0 +1,54 @@
+login
+// 1. grab stock quantity and edit the out of stock label
+validate that page contains "Dashboard"
+click "menu" if "Orders" above "Catalog" is not visible
+click "Catalog"
+click "Products" roughly below "Catalog"
+search for "Mug The best is yet to come"
+Click button exactly "Mug The best is yet to come"
+grab value from "quantity" above "in stock" and save it as "qty"
+click button exactly "Stocks"
+enter "OUT OF STOCK" into field "Label when out of stock"
+click button "Save and publish"
+scroll up at the top of the screen
+Check that page contains "Successful update"
+start browser "Customer Browser" and switch
+// 2. buy all stock available
+click "Back to"
+create new customer account
+Search for "Mug The best is yet to come"
+Click button "Mug The best is yet to come"
+enter saved value "qty" into field "Quantity"
+complete the purchase and check out
+validate that page contains "YOUR ORDER IS CONFIRMED"
+Search for "Mug The best is yet to come"
+click button "Mug The best is yet to come"
+validate that page contains "OUT OF STOCK"
+switch to browser "default"
+// 3. validate that the stock was consumed and restock item
+click "Catalog"
+click "Products" roughly below "Catalog"
+search for "Mug The best is yet to come"
+Click button exactly "Mug The best is yet to come"
+validate that page contains exactly "out of stock"
+edit the quantity to add "10" items
+switch to browser "Customer Browser"
+search for "Mug The best is yet to come"
+click button exactly "Mug The best is yet to come"
+validate that page contains "Add to Cart"
+validate that page doesn't contain "OUT OF STOCK"
+// 4. validate if the "add to cart" button consumes the item
+enter "10" into field "Quantity"
+Click "Add to cart"
+click "Continue Shopping"
+validate that "Add to cart" button is disabled
+check if page contains "OUT OF STOCK"
+// switch to browser "default"
+// 5. restock the item
+// edit the quantity to add saved value "qty" items
+// Click "Save and publish" button
+// Switch to browser "Customer Browser"
+// reload
+// validate that "OUT OF STOCK" is invisible
+switch to browser "default"
+clean-up customers

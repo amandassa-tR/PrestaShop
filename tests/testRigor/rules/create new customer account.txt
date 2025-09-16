@@ -1,0 +1,13 @@
+click "Back to" if exists
+click "View my store" if exists
+click "Sign in"
+click "No account? Create one here"
+check if page contains "Create an account"
+generate unique name, then enter into "Last name" and save it as "name"
+fill out all empty fields
+accept prompt with value ""
+enter saved value "password" into "Password"
+grab value from field "Email" and save it as "email"
+scroll down
+click "Save"
+validate that page contains "Sign out"

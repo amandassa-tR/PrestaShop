@@ -1,0 +1,12 @@
+click "ADD TO CART"
+click "PROCEED TO CHECKOUT"
+click "PROCEED TO CHECKOUT"
+select "France" from "Country"
+fill out all empty fields
+click "CONTINUE"
+click "CONTINUE"
+check if "PAYMENT" is visible
+click "Pay by cash on delivery"
+click "I agree"
+click "PLACE ORDER"
+validate that page contains "YOUR ORDER IS CONFIRMED"

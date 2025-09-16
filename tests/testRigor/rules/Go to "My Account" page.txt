@@ -1,0 +1,5 @@
+click saved value "name"
+check that page contains "Your account"
+check that page contains "INFORMATION"
+check that page contains "ORDER HISTORY AND DETAILS"
+check that page contains "MY WISHLISTS"

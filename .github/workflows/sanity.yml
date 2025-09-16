@@ -1,6 +1,7 @@
 name: UI tests
 
-on: [ push, pull_request ]
+on:
+  workflow_dispatch:
 
 permissions:
   contents: read   #   to fetch code (actions/checkout)
@@ -10,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TEST_CAMPAIGN: 'sanity:fast-fail'
+  TEST_CAMPAIGN: sanity:fast-fail
 
 jobs:
   sanity:
@@ -92,5 +93,226 @@ jobs:
           name: sanity-${{ matrix.php }}-${{ matrix.browser }}-${{ matrix.db }}
           path: |
             ./tests/UI/screenshots/
+            ./var/logs
+            ./var/docker-logs
+
+  testrigor:
+    permissions:
+      contents: read   #   to fetch code (actions/checkout)
+    runs-on: ubuntu-latest
+    name: testRigor E2E Testing with Email
+    strategy:
+      matrix:
+        include:
+          - php: 8.3
+            browser: chromium
+            db: mysql
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Environment
+        timeout-minutes: 15
+        uses: ./.github/actions/setup-env
+        with:
+          PHP_VERSION: ${{ matrix.php }}
+          ENABLE_SSL: 'true'
+          INSTALL_AUTO: 'true'
+          DB_SERVER: ${{ matrix.db }}
+
+      - name: Setup Environment failure
+        uses: ./.github/actions/setup-env-export-logs
+        with:
+          DOCKER_PREFIX: prestashop
+          ARTIFACT_NAME: setup-testrigor-${{ matrix.php }}-${{ matrix.browser }}-${{ matrix.db }}
+          DB_SERVER: ${{ matrix.db }}
+          ENABLE_SSL: 'true'
+          INSTALL_AUTO: 'true'
+        if: failure()
+
+      - name: Check Frontend Accessibility
+        run: |
+          echo "Checking PrestaShop frontend accessibility..."
+          FRONTEND_URL="https://localhost:8002/en/"
+          
+          # Wait for the frontend to be fully accessible (up to 5 minutes)
+          timeout=100
+          counter=0
+          
+          while [ $counter -lt $timeout ]; do
+            echo "Attempting to reach $FRONTEND_URL (attempt $((counter + 1)))"
+            
+            if curl -LI -k "$FRONTEND_URL" | grep -q "200"; then
+              echo "✅ PrestaShop frontend is accessible at $FRONTEND_URL"
+              curl -L -s -k -I "$FRONTEND_URL"
+              exit 0
+            fi
+            
+            echo "Frontend not ready yet, waiting 10 seconds..."
+            sleep 1
+            counter=$((counter + 10))
+          done
+
+          echo "❌ Frontend accessibility check failed after $timeout seconds"
+          echo "Docker container status:"
+          docker ps
+          echo "Container logs:"
+          docker logs prestashop-prestashop-git-1 --tail 50
+          exit 1
+
+      - name: Configure E2E Testing Environment
+        run: |
+          echo "=== Configuring E2E Test Prerequisites ==="
+          FRONTEND_URL="https://localhost:8002"
+
+          # Disable Check IP
+          docker exec prestashop-prestashop-git-1 php bin/console prestashop:config set PS_COOKIE_CHECKIP --value "0"
+          echo "✅ Check IP disabled for testing"
+
+          # Clear cache after configuration changes
+          docker exec prestashop-prestashop-git-1 php bin/console cache:clear
+          echo "✅ Cache cleared"
+
+          # Install payment modules one by one with checks
+          echo "Installing payment modules with frontend checks..."
+          for module in ps_wirepayment ps_checkpayment ps_cashondelivery; do
+            echo "Processing module: $module"
+            docker exec prestashop-prestashop-git-1 php bin/console prestashop:module install $module || echo "Module $module may already be installed"
+            docker exec prestashop-prestashop-git-1 php bin/console prestashop:module enable $module || echo "Failed to enable $module"
+            
+            # Wait a moment for module to be properly loaded
+            sleep 2
+            
+            # Check frontend after each module
+            echo "Checking frontend after $module installation..."
+            if curl -L -s -k -o /dev/null -w "%{http_code}" "$FRONTEND_URL" | grep -q "200"; then
+              echo "✅ Frontend still accessible after $module"
+            else
+              echo "❌ Frontend became inaccessible after $module installation"
+              echo "This module may have caused the issue: $module"
+              # Check error logs
+              docker exec prestashop-prestashop-git-1 tail -n 10 /var/www/html/var/logs/dev.log || echo "No dev logs available"
+            fi
+          done
+
+          # Configure US payment method restrictions using PrestaShop CLI (safer than direct DB operations)
+          echo "Configuring US payment method restrictions..."
+          
+          # First, ensure US is an active country
+          docker exec prestashop-prestashop-git-1 php -r "
+            require_once '/var/www/html/config/config.inc.php';
+            \$us_country_id = Country::getByIso('US') ?: 21;
+            Db::getInstance()->execute('UPDATE ' . _DB_PREFIX_ . 'country SET active = 1 WHERE id_country = ' . (int)\$us_country_id);
+            echo 'United States country activated (ID: ' . \$us_country_id . ')' . PHP_EOL;
+          "
+          
+          # Clear cache after country changes
+          docker exec prestashop-prestashop-git-1 php bin/console cache:clear
+          
+          # Configure payment modules for US using PrestaShop's API (safer approach)
+          docker exec prestashop-prestashop-git-1 php -r "
+            require_once '/var/www/html/config/config.inc.php';
+            
+            \$us_country_id = Country::getByIso('US') ?: 21;
+            \$shop_id = Context::getContext()->shop->id;
+            
+            // Payment modules to enable for US
+            \$modules = ['ps_wirepayment', 'ps_checkpayment', 'ps_cashondelivery'];
+            
+            foreach (\$modules as \$module_name) {
+              \$module = Module::getInstanceByName(\$module_name);
+              if (\$module && \$module->id) {
+                // Use PrestaShop's method to update country restrictions
+                \$countries = [\$us_country_id];
+                \$module->updateCountryRestrictions(\$countries);
+                echo 'Configured ' . \$module_name . ' for United States' . PHP_EOL;
+              } else {
+                echo 'Module ' . \$module_name . ' not found or not active' . PHP_EOL;
+              }
+            }
+          "
+          
+          # Final cache clear to ensure all changes are applied
+          docker exec prestashop-prestashop-git-1 php bin/console cache:clear
+          echo "✅ Payment methods configured for US market"
+          
+          # Wait for frontend to stabilize after all changes
+          echo "Waiting for frontend to stabilize..."
+          sleep 5
+
+      - name: Check Frontend Accessibility
+        run: |
+          echo "Checking PrestaShop frontend accessibility..."
+          FRONTEND_URL="https://localhost:8002"
+
+          # Wait for the frontend to be fully accessible (up to 5 minutes)
+          timeout=10
+          counter=0
+
+          while [ $counter -lt $timeout ]; do
+            echo "Attempting to reach $FRONTEND_URL (attempt $((counter + 1)))"
+
+            if curl -L -s -k -o /dev/null -w "%{http_code}" "$FRONTEND_URL" | grep -q "200"; then
+              echo "✅ PrestaShop frontend is accessible at $FRONTEND_URL"
+              curl -L -s -k -I "$FRONTEND_URL"
+              exit 0
+            fi
+
+            echo "Frontend not ready yet, waiting 10 seconds..."
+            sleep 10
+            counter=$((counter + 10))
+          done
+
+          echo "❌ Frontend accessibility check failed after $timeout seconds"
+          echo "Docker container status:"
+          docker ps
+          echo "Container logs:"
+          docker logs prestashop-prestashop-git-1 --tail 50
+          exit 1
+
+      - name: Setup Node.js
+        id: setup-nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+  
+      - name: Install testRigor CLI
+        if: steps.setup-nodejs.outcome == 'success'
+        id: install-testrigor
+        run: |
+          npm install -g testrigor-cli
+  
+      - name: Run testRigor tests
+        env:
+          TEST_CASES_PATH: "tests/testRigor/testcases/**/*.txt"
+          RULES_PATH: "tests/testRigor/rules/**/*.txt"
+          LOCALHOST_URL: "https://localhost:8002/admin-dev"
+          AUTH_TOKEN: ${{ secrets.CI_TOKEN }}
+          TEST_SUITE_ID: ${{ vars.SUITE_ID }}
+        run: |
+          testrigor --version
+          BRANCH_NAME=$(git branch --show-current)
+          COMMIT_HASH=$(git rev-parse HEAD)
+          testrigor test-suite run "$TEST_SUITE_ID" \
+          --token "$AUTH_TOKEN" \
+          --localhost --url "$LOCALHOST_URL" \
+          --test-cases-path "$TEST_CASES_PATH" \
+          --rules-path "$RULES_PATH" \
+          --verbose
+
+      - name: Export docker logs
+        if: failure()
+        run: |
+          mkdir -p ./var/docker-logs
+          docker logs prestashop-${{ matrix.db }}-1 > ./var/docker-logs/${{ matrix.db }}.log
+          docker logs prestashop-prestashop-git-1 > ./var/docker-logs/prestashop.log
+
+      - name: Upload Screenshots and logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: testrigor-${{ matrix.php }}-${{ matrix.browser }}-${{ matrix.db }}
+          path: |
             ./var/logs
             ./var/docker-logs

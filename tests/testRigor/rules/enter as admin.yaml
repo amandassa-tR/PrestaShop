@@ -1,0 +1,13 @@
+labels:
+- enter as admin
+steps: |
+  login
+precondition: |
+  validate that page contains "PrestaShop" on the right of "Back to"
+  validate that page contains field "Email address"
+  validate that page contains field "Password"
+autoApplyRule: false
+autoApplyAtFirstSteps: 0
+applicationId: 79tkMgXvDgYWtvaBk
+limitAutoApplyRule: true
+maxAutoApplyNumber: 10

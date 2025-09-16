@@ -1,0 +1,3 @@
+validate that page contains field "Email address"
+validate that page contains field "Password"
+validate that page contains button "Login"

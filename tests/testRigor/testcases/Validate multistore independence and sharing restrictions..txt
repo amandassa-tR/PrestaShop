@@ -1,0 +1,164 @@
+login
+validate that page contains "Dashboard"
+// enable multistore
+click "menu"
+scroll down at the left side of the screen
+Click "Shop Parameters"
+click "Preferences"
+scroll down
+click "No" roughly on the right of "Enable Multistore" if exists
+validate that page contains "Yes" roughly on the right of "Enable Multistore"
+click "Save"
+validate that page contains "Successful update"
+click "menu"
+scroll down at the left side of the screen
+scroll down on "Welcome" until page contains "Advanced Parameters"
+click "Advanced Parameters"
+click "Multistore" roughly below "Advanced Parameters"
+Verify page contains "Multistore Tree"
+// create shared group
+Click "Add a new group of stores" button
+generate unique name , then enter into "Name of the store group" and save as "groupName"
+if "No" below "Share customers" is visible then:
+click "No" below "Share customers"
+end
+validate that "Yes" is visible below "Share customers"
+Click "Save" button
+Verify page contains "Successful creation"
+// create 1st store on shared group
+Click "Add a new store" button
+generate unique name , then enter into "Store name" and save as "storeName"
+Select saved value "groupName" from "Store group" dropdown
+Select "Home" from "Category Root" dropdown
+click radiobutton "classic"
+Click "Save" button
+click "No" on the right of "Import data" if exists
+Verify "Successful creation" is visible
+scroll down
+Click "Click here to set a URL for this shop." button roughly on the right of saved value "storeName"
+Enter saved value "storeName" in "Virtual URL" field
+Click "Save" button
+validate that page contains "Successful creation"
+// create 2nd store in shared group
+click saved value "groupName" roughly below "Multistore Tree"
+Click "Add a new store" button
+generate unique name , then enter into "Store name" and save as "storeName2"
+Select saved value "groupName" from "Store group" dropdown
+Select "Home" from "Category Root" dropdown
+click radiobutton "classic"
+Click "Save" button
+click "No" on the right of "Import data" if exists
+scroll down
+Click "Click here to set a URL for this shop." button roughly on the right of saved value "storeName2"
+Enter saved value "storeName2" in "Virtual URL" field
+Click "Save" button
+scroll up at the top of the screen
+validate that page contains "Successful creation"
+// create shops in an independent group
+// navigate to multistore list
+click "Default" below "Multistore Tree"
+Click "Add a new group of stores" button
+// create independent group and store within the group
+generate unique name , then enter into "Name of the store group" and save as "IndependentGroup"
+click "Yes" on the right of "Share customers" if exists
+Click "Save" button
+Verify page contains "Successful creation"
+// create store in independent group
+scroll down until page contains  saved value "IndependentGroup"
+Click "Add a new store" button
+generate unique name , then enter into "Store name" and save as "IndependentStore"
+Select saved value "IndependentGroup" from "Store group" dropdown
+Select "Home" from "Category root" dropdown
+Click "Save" button
+validate that page contains "Successful creation"
+Click "Click here to set a URL for this shop." button roughly on the right of saved value "IndependentStore"
+Enter saved value "IndependentStore" in "Virtual URL" field
+Click "Save" button
+validate that page contains "Successful creation"
+// add new group of  premium customers
+click "menu"
+scroll down at the left side of the screen
+Click "Shop Parameters" above "Advanced Parameters" at the left side of the screen
+// create new customer group
+click "Customer Settings"
+click "Groups"
+click "Add new group"
+fill out form "Customer group"
+generate from template "#0", then enter into "Discount" and save it as "discountPercentage"
+generate unique name , then enter into "Name" and save it as "PremiumCustomers"
+scroll down
+click "Save"
+check that page contains "Successful creation"
+// create new customers
+start browser "Premium Customer" and switch
+open url string with parameters "${homePrefix}/${storeName}"
+create new customer account
+save saved value "name" as "PremiumCustomerName"
+save saved value "email" as "PremiumCustomerEmail"
+start browser "Regular Customer" and switch
+open url string with parameters "${homePrefix}/${storeName}"
+create new customer account
+save saved value "name" as "RegularCustomerName"
+save saved value "email" as "RegularCustomerEmail"
+// Assign premium customer to group
+switch to browser "default"
+navigate to customers page
+enter saved value "PremiumCustomerEmail" into "Search email"
+enter enter
+scroll down
+scroll left on saved value "PremiumCustomerEmail"
+Click "Edit" button roughly to the right of saved value "PremiumCustomerEmail"
+Scroll down until page contains "Group access"
+double click "Select all"
+click saved value "PremiumCustomers"
+Select saved value "PremiumCustomers" from "Default customer group" dropdown
+Click "Save" button
+validate that page contains "Successful update"
+// validate that regular customer can log into first store
+switch to browser "Regular Customer"
+// on store 1
+search for "Today is a good day Framed poster"
+click button "Today is a good day Framed poster"
+grab value of "(?<=€)[0-9.]+" and save it as "regularPrice"
+click "Add to cart"
+click "Continue shopping"
+// validate that regular customer can log into second store within the group
+start browser "Regular Customer 2" and switch
+open url string with parameters "${homePrefix}/${storeName2}"
+save saved value "RegularCustomerEmail" as "username"
+login
+// validate that premium customer can log into both stores and has discount on both stores
+Switch to browser "Premium Customer"
+// on store 1
+search for "Today is a good day Framed poster"
+click "Today is a good day Framed poster"
+grab value of "(?<=€)[0-9.]+" and save it as "groupPrice"
+// validate discount is on premium customer and not on regular customer
+check that expression "(((${regularPrice} - ${groupPrice}) / ${regularPrice}) * 100) - ${discountPercentage}" itself is less than as a number to "0.1"
+start browser "Premium Customer 2" and switch
+open url string with parameters "${homePrefix}/${storeName2}"
+save saved value "PremiumCustomerEmail" as "username"
+login
+search for "Today is a good day Framed poster"
+click "Today is a good day Framed poster"
+grab value of "(?<=€)[0-9.]+" and save it as "groupPrice2"
+validate that saved value "groupPrice" is equal as a number to "groupPrice2"
+// **Browser Window 4 (Store C - Isolated Session Testing):**
+start browser "Independent Store" and switch
+open url string with parameters "${homePrefix}/${IndependentStore}"
+create new customer account
+save value "name" as "IndependentStoreCustomerName"
+save value "email" as "username"
+logout
+// validate the independent store customer can not log into the other group's stores
+//store 1
+open url string with parameters "${homePrefix}/${storeName}"
+login
+validate that page contains "Authentication failed."
+//store 2
+open url string with parameters "${homePrefix}/${storeName2}"
+login
+validate that page contains "Authentication failed."
+//clean up
+switch to browser "default"
+clean-up customers

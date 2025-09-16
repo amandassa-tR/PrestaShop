@@ -1,0 +1,48 @@
+// Add items to a wishlist and share it
+create new customer account
+Go to "My Account" page
+Click "My wishlists" link
+Click "Create new list" button
+Enter "Wedding Registry" into "Wishlist name"
+Click "Create wishlist" button
+click "Home"
+Search for "Hummingbird printed t-shirt"
+click link "Hummingbird printed t-shirt"
+click "favorite" on the right of "Add to cart"
+click "Wedding Registry"
+search for "Bear"
+click "favorite" above and on the right of "Brown bear cushion"
+click "Wedding Registry"
+click saved value "name"
+click "My wishlists"
+click "more" on the right of "Wedding Registry"
+click "Share"
+grab value from field "Share link" and save it as "wishlist"
+validate that page contains saved value "wishlist" roughly below "Share link"
+click "×"
+click "Wedding Registry"
+validate that page contains "Wedding Registry (2)"
+validate that page contains "Hummingbird printed t-shirt"
+validate that page contains "Brown bear cushion"
+// Open the shared wishlist and validate items
+start browser "Friend Browser" and switch
+create new customer account
+open url saved value "wishlist"
+Check that page contains "Wedding Registry (2)"
+validate that page contains "Hummingbird printed t-shirt"
+validate that page contains "Brown bear cushion"
+// validate that owner's changes to the shared list are viewed by others
+switch to browser "default"
+search for "The best is yet to come"
+click "favorite" above and on the right of "Mug The best is yet to come"
+click "Wedding Registry"
+click "account"
+click "My wishlists"
+reload
+click "Wedding Registry (3)"
+reload
+validate that page contains "Wedding Registry (3)"
+switch to browser "Friend Browser"
+open url saved value "wishlist"
+validate that page contains "Wedding Registry (3)"
+validate that "Mug The best is yet to come" is visible

@@ -1,14 +1,7 @@
 name: UI tests code checks
 
 on:
-  push:
-    paths:
-      - 'tests/UI/**'
-      - '.github/workflows/ui_tests_code_checks.yml'
-  pull_request:
-    paths:
-      - 'tests/UI/**'
-      - '.github/workflows/ui_tests_code_checks.yml'
+  workflow_dispatch:
 
 defaults:
   run:
