@@ -98,7 +98,7 @@ jobs:
 
   testrigor:
     permissions:
-      contents: read   #   to fetch code (actions/checkout)
+      contents: read
     runs-on: ubuntu-latest
     name: testRigor E2E Testing with Email
     strategy:
