@@ -1,6 +1,7 @@
 name: PHP
 on:
-  workflow_dispatch:
+  push:
+  pull_request:
 
 permissions:
   contents: read

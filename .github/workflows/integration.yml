@@ -1,6 +1,7 @@
 name: Integration tests
 on:
-  workflow_dispatch:
+  push:
+  pull_request:
 
 permissions:
   contents: read   #   to clone the repos and get release assets (shivammathur/setup-php)

@@ -1,7 +1,9 @@
 name: UI tests code checks
 
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - 'tests/UI/**'
 
 defaults:
   run:

@@ -19,6 +19,11 @@ RUN groupmod -g $GROUP_ID www-data \
   && usermod -u $USER_ID -g $GROUP_ID www-data
 
 COPY .docker/wait-for-it.sh /tmp/
+COPY .docker/configure_payment_modules.sh /tmp/
+COPY .docker/debug_payment_modules.sh /tmp/
+
+# Set permissions for scripts
+RUN chmod +x /tmp/wait-for-it.sh /tmp/configure_payment_modules.sh /tmp/debug_payment_modules.sh
 
 # Install mailutils to make sendmail work
 RUN apt update && apt install -y mailutils

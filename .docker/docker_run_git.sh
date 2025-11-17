@@ -157,6 +157,21 @@ if [ $PS_USE_DOCKER_MAILDEV -eq 1 ]; then
     runuser -g www-data -u www-data -- php /var/www/html/bin/console prestashop:config set PS_MAIL_SMTP_PORT --value "1025"
 fi
 
+# Configure payment modules for E2E testing
+if [ "${PS_CONFIGURE_PAYMENT_MODULES:-1}" = "1" ]; then
+    echo "\n* Configuring payment modules for E2E testing ..."
+    if [ -f /tmp/configure_payment_modules.sh ]; then
+        bash /tmp/configure_payment_modules.sh
+        if [ $? -ne 0 ]; then
+            echo 'warning: Payment modules configuration failed.'
+        else
+            echo "\n* Payment modules configured successfully for E2E testing"
+        fi
+    else
+        echo 'warning: Payment modules configuration script not found.'
+    fi
+fi
+
 if [ $BLACKFIRE_ENABLE -eq 1 ]; then
     if [ "$BLACKFIRE_SERVER_ID" = "0" ] || [ "$BLACKFIRE_SERVER_TOKEN" = "0" ]; then
             echo "\n* BLACKFIRE_SERVER_ID and BLACKFIRE_SERVER_TOKEN environment variables missing."
