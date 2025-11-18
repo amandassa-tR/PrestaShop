@@ -110,6 +110,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure Payment Methods
+        run: |
+          chmod +x ./setup_payment_methods.sh
+          ./setup_payment_methods.sh
+          echo "Payment methods configuration completed"
+
       - name: Setup Environment
         timeout-minutes: 15
         uses: ./.github/actions/setup-env
