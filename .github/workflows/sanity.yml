@@ -121,7 +121,7 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           PHP_VERSION: ${{ matrix.php }}
-          ENABLE_SSL: 'true'
+          ENABLE_SSL: 'false'
           INSTALL_AUTO: 'true'
           DB_SERVER: ${{ matrix.db }}
 
@@ -131,7 +131,7 @@ jobs:
           DOCKER_PREFIX: prestashop
           ARTIFACT_NAME: setup-testrigor-${{ matrix.php }}-${{ matrix.browser }}-${{ matrix.db }}
           DB_SERVER: ${{ matrix.db }}
-          ENABLE_SSL: 'true'
+          ENABLE_SSL: 'false'
           INSTALL_AUTO: 'true'
         if: failure()
 
