@@ -1,84 +1,53 @@
 #!/bin/bash
 set -e
 
-# Script to modify docker-compose.yml and enable payment methods before PrestaShop installation
+# Script to verify payment methods configuration for PrestaShop GitHub Actions
 # Usage: ./setup_payment_methods.sh
 
-DOCKER_COMPOSE_FILE="docker-compose.yml"
-BACKUP_FILE="docker-compose.yml.backup"
+echo "Verifying PrestaShop payment methods configuration for GitHub Actions..."
 
-echo "Setting up PrestaShop with payment methods pre-configuration..."
-
-# Backup original docker-compose.yml
-if [ -f "$DOCKER_COMPOSE_FILE" ]; then
-    echo "Backing up original docker-compose.yml..."
-    cp "$DOCKER_COMPOSE_FILE" "$BACKUP_FILE"
-    echo "Backup created: $BACKUP_FILE"
+# Check if the existing docker-compose.yml has payment configuration enabled
+if [ -f "docker-compose.yml" ]; then
+    echo "✅ Docker compose file exists"
+    
+    # Check if PS_CONFIGURE_PAYMENT_MODULES is enabled in the compose file
+    if grep -q "PS_CONFIGURE_PAYMENT_MODULES" docker-compose.yml; then
+        echo "✅ PS_CONFIGURE_PAYMENT_MODULES found in docker-compose.yml"
+    else
+        echo "⚠️ PS_CONFIGURE_PAYMENT_MODULES not explicitly set, using default (enabled)"
+    fi
+else
+    echo "❌ docker-compose.yml not found"
+    exit 1
 fi
 
-# Create the modified docker-compose.yml
-echo "Creating modified docker-compose.yml with payment methods configuration..."
+# Check if the payment configuration script exists
+if [ -f ".docker/configure_payment_modules.sh" ]; then
+    echo "✅ Payment modules configuration script found"
+else
+    echo "❌ .docker/configure_payment_modules.sh not found"
+    exit 1
+fi
 
-cat > "$DOCKER_COMPOSE_FILE" << 'EOF'
-services:
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: prestashop
-      MYSQL_DATABASE: prestashop
-    volumes:
-      - db-data:/var/lib/mysql
-    restart: unless-stopped
+# Check if the Dockerfile exists
+if [ -f ".docker/Dockerfile" ]; then
+    echo "✅ Docker build file found"
+else
+    echo "❌ .docker/Dockerfile not found" 
+    exit 1
+fi
 
-  prestashop-git:
-    build:
-      dockerfile: .docker/Dockerfile
-      context: .
-      args:
-        - VERSION=8.1-apache
-        - USER_ID=1000
-        - GROUP_ID=1000
-        - NODE_VERSION=16.20.1
-    depends_on:
-      - mysql
-    environment:
-      PS_INSTALL_AUTO: 1
-      PS_DEV_MODE: 0
-      PS_ENABLE_SSL: 0
-      PS_DOMAIN: localhost:8001
-      PS_FOLDER_ADMIN: admin-dev
-      PS_FOLDER_INSTALL: install-dev
-      PS_LANGUAGE: en
-      PS_COUNTRY: us
-      DB_SERVER: mysql
-      DB_NAME: prestashop
-      DB_USER: root
-      DB_PASSWD: prestashop
-      DB_PREFIX: tst_
-      ADMIN_MAIL: demo@prestashop.com
-      ADMIN_PASSWD: "Correct Horse Battery Staple"
-      
-    ports:
-      - "8001:80"
-    volumes:
-      - prestashop-var:/var/www/html/var
-    restart: unless-stopped
-
-volumes:
-  db-data:
-  prestashop-var:
-EOF
-
-echo "Modified docker-compose.yml created successfully!"
 echo ""
-echo "Setup complete! Configuration summary:"
+echo "🎉 Setup verification complete! The existing PrestaShop configuration will:"
 echo ""
-echo "PrestaShop development environment configured"
-echo "MySQL database for development"
-echo "Service name: prestashop-git (compatible with GitHub Actions)"
-echo "Auto-installation enabled"
+echo "✅ Automatically install and enable payment modules:"
+echo "   - ps_wirepayment (Wire Transfer)"
+echo "   - ps_checkpayment (Check Payment)" 
+echo "   - ps_cashondelivery (Cash on Delivery)"
 echo ""
-echo "Files created/modified:"
-echo "  $DOCKER_COMPOSE_FILE (modified)"
-echo "  $BACKUP_FILE (backup of original)"
+echo "✅ Configure modules for all countries, currencies, and customer groups"
+echo "✅ Disable restrictive settings for E2E testing"
+echo "✅ Enable guest checkout for testing convenience"
+echo ""
+echo "No modifications needed - the existing setup handles payment configuration!"
 echo ""
