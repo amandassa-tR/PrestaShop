@@ -121,7 +121,7 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           PHP_VERSION: ${{ matrix.php }}
-          ENABLE_SSL: 'false'
+          ENABLE_SSL: 'true'
           INSTALL_AUTO: 'true'
           DB_SERVER: ${{ matrix.db }}
 
@@ -131,14 +131,14 @@ jobs:
           DOCKER_PREFIX: prestashop
           ARTIFACT_NAME: setup-testrigor-${{ matrix.php }}-${{ matrix.browser }}-${{ matrix.db }}
           DB_SERVER: ${{ matrix.db }}
-          ENABLE_SSL: 'false'
+          ENABLE_SSL: 'true'
           INSTALL_AUTO: 'true'
         if: failure()
 
       - name: Check Frontend Accessibility
         run: |
           echo "Checking PrestaShop frontend accessibility..."
-          FRONTEND_URL="http://localhost:8001/en/"
+          FRONTEND_URL="https://localhost:8002/en/"
           
           # Wait for the frontend to be fully accessible (up to 5 minutes)
           timeout=100
@@ -147,9 +147,9 @@ jobs:
           while [ $counter -lt $timeout ]; do
             echo "Attempting to reach $FRONTEND_URL (attempt $((counter + 1)))"
             
-            if curl -LI "$FRONTEND_URL" | grep -q "200"; then
+            if curl -LI -k "$FRONTEND_URL" | grep -q "200"; then
               echo "✅ PrestaShop frontend is accessible at $FRONTEND_URL"
-              curl -L -s -I "$FRONTEND_URL"
+              curl -L -s -k -I "$FRONTEND_URL"
               exit 0
             fi
             
@@ -229,7 +229,7 @@ jobs:
         env:
           TEST_CASES_PATH: "src/tests/testRigor/testcases/**/*.txt"
           RULES_PATH: "src/tests/testRigor/rules/**/*.txt"
-          LOCALHOST_URL: "http://localhost:8001/admin-dev"
+          LOCALHOST_URL: "https://localhost:8002/admin-dev"
           AUTH_TOKEN: ${{ secrets.CI_TOKEN }}
           TEST_SUITE_ID: ${{ vars.SUITE_ID }}
         run: |
