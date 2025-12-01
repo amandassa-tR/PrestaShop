@@ -153,9 +153,9 @@ jobs:
               exit 0
             fi
             
-            echo "Frontend not ready yet, waiting 10 seconds..."
-            sleep 1
-            counter=$((counter + 10))
+            echo "Frontend not ready yet, waiting 5 seconds..."
+            sleep 5
+            counter=$((counter + 1))
           done
           echo "❌ Frontend accessibility check failed after $timeout seconds"
           echo "Docker container status:"
